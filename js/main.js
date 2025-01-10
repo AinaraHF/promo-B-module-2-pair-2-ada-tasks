@@ -3,13 +3,11 @@
 const taskList = document.querySelector('.js-tasklist');
 const btnFilter = document.querySelector('.js-btn-filter');
 const inputFilter = document.querySelector('.js-text-task-filter');
+const sentence = document.querySelector('.js-sentence');
+const inputAdd = document.querySelector('.js-text-task-add');
+const btnAdd = document.querySelector('.js-btn-add');
 
-/*const tasks = [
-    { name: "Recoger setas en el campo", completed: true, id: 1 },
-    { name: "Comprar pilas", completed: true, id: 2 },
-    { name: "Poner una lavadora de blancos", completed: true, id: 3 },
-    { name: "Aprender cómo se realizan las peticiones al servidor en JavaScript", completed: false, id: 4,},
-  ];*/
+
 
 let tasks = [];
 const GITHUB_USER = "<tu_usuario_de_github_aqui>";
@@ -18,7 +16,7 @@ const SERVER_URL = `https://dev.adalab.es/api/todo/${GITHUB_USER}`;
 fetch('https://dev.adalab.es/api/todo')
   .then((response) => response.json())
   .then((data) => {
-    console.log(data);
+    //console.log(data);
     tasks = data.results;
     renderTasks(tasks);
   });
@@ -33,13 +31,10 @@ function renderTasks(array){
         taskList.innerHTML += `<li><input id="${task.id}" type="checkbox"/>${task.name}</li>`;
     }
     }
+    addSentence();
   };
 
 renderTasks(tasks);
-
-//obtener el id del checkboc clickado con finindex
-//buscar en que posicion se encuentra la tarea con ese id
-//cambiar dentro del array con valor completed al valor contrario
 
 const handleClickList = (event) => {
   const taskId = parseInt(event.target.id); // Obtengo el id del checkbox clickado por la usuaria
@@ -71,3 +66,58 @@ function handleClickFilter(ev){
 };
 
 btnFilter.addEventListener('click', handleClickFilter);
+
+
+//Ejercicio 2
+
+//crear una funcion
+
+function addSentence (){
+  const completedTask = tasks.filter((task) => task.completed === true);
+  const unfinishedTask = tasks.filter((task) => task.completed === false);
+  sentence.innerHTML = `Tienes ${tasks.length} tareas.  ${completedTask.length} tareas completadas. ${unfinishedTask.length} tareas por realizar.`;
+  console.log(completedTask);
+
+};
+
+//ejercicio Agregar un nueva tarea
+
+const handleNewTask = (event) => {
+  event.preventDefault();
+  const newTaskValue = inputAdd.value;
+  const newTask = {
+    name: `${newTaskValue}`,
+    completed: false,
+  };
+  tasks.push(newTask);
+  renderTasks(tasks);
+
+  localStorage.setItem('userTasks', JSON.stringify(tasks));
+
+};
+
+
+btnAdd.addEventListener('click', handleNewTask);
+
+
+const tasksLocalStorage = JSON.parse(localStorage.getItem("tasks"));
+
+
+//ejercicio 2 pendiente
+if (tasksLocalStorage !== null) {
+  renderTasks(tasksLocalStorage);
+
+  // pinta la lista de tareas almacenadas en tasksLocalStorage
+} else {
+  //sino existe el listado de tareas en el local storage
+  // pide los datos al servidor
+  fetch(SERVER_URL)
+    .then((response) => response.json())
+    .then((data) => {
+      //guarda el listado obtenido en el Local Storage
+      // pinta la lista de tareas
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
