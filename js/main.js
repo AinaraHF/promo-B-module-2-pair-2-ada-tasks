@@ -13,22 +13,35 @@ let tasks = [];
 const GITHUB_USER = "<tu_usuario_de_github_aqui>";
 const SERVER_URL = `https://dev.adalab.es/api/todo/${GITHUB_USER}`;
 
-fetch('https://dev.adalab.es/api/todo')
-  .then((response) => response.json())
-  .then((data) => {
-    //console.log(data);
-    tasks = data.results;
-    renderTasks(tasks);
-  });
-  
-
-function renderTasks(array){
+/*function renderTasks(array){
     taskList.innerHTML = '';
     for(const task of array){
     if (task.completed === true){
         taskList.innerHTML += `<li class="tachado"><input id="${task.id}" type="checkbox" checked/>${task.name}</li>`;
     }else{
         taskList.innerHTML += `<li><input id="${task.id}" type="checkbox"/>${task.name}</li>`;
+    }
+    }
+    addSentence();
+  };*/
+
+  function renderTasks(array){
+    taskList.innerHTML = '';
+    for(const task of array){
+    const li = document.createElement('li');
+    const liText = document.createTextNode(task.name);
+    const input = document.createElement('input');
+    li.append(input,liText);
+    input.setAttribute('id', task.id);
+    input.setAttribute('type', 'checkbox');
+    taskList.appendChild(li);  
+    //li.appendChild(liText); Se pueden dejar dos appendChild con input o liText o solo un append con ambos, en este orden (input,liText)
+
+    if (task.completed === true){
+        input.setAttribute('checked', true);
+        li.classList.add('tachado');      
+      
+      //taskList.innerHTML += `<li class="tachado"><input id="${task.id}" type="checkbox" checked/>${task.name}</li>`; Sería lo mismo sin el DOM
     }
     }
     addSentence();
@@ -93,15 +106,12 @@ const handleNewTask = (event) => {
   renderTasks(tasks);
 
   localStorage.setItem('userTasks', JSON.stringify(tasks));
-
 };
-
 
 btnAdd.addEventListener('click', handleNewTask);
 
 
 const tasksLocalStorage = JSON.parse(localStorage.getItem("tasks"));
-
 
 //ejercicio 2 pendiente
 if (tasksLocalStorage !== null) {
@@ -111,12 +121,13 @@ if (tasksLocalStorage !== null) {
 } else {
   //sino existe el listado de tareas en el local storage
   // pide los datos al servidor
-  fetch(SERVER_URL)
-    .then((response) => response.json())
-    .then((data) => {
-      //guarda el listado obtenido en el Local Storage
-      // pinta la lista de tareas
-    })
+  fetch('https://dev.adalab.es/api/todo')
+  .then((response) => response.json())
+  .then((data) => {
+    tasks = data.results;
+    localStorage.setItem('userTasks', JSON.stringify(tasks));
+    renderTasks(tasks);
+  })
     .catch((error) => {
       console.error(error);
     });
