@@ -102,25 +102,45 @@ const handleNewTask = (event) => {
     name: `${newTaskValue}`,
     completed: false,
   };
-  tasks.push(newTask);
-  renderTasks(tasks);
+  //tasks.push(newTask);
+  //renderTasks(tasks);
 
-  localStorage.setItem('userTasks', JSON.stringify(tasks));
+  
+
+  fetch(`https://dev.adalab.es/api/todo/${GITHUB_USER}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newTask),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        newTask.id = data.id
+        tasks.push(newTask);
+        renderTasks(tasks);
+        localStorage.setItem('userTasks', JSON.stringify(tasks));
+        inputAdd.value = ''
+      } else {
+        //muestra un mensaje de error.
+      }
+
+
+      console.log(data)
+    });
 };
 
 btnAdd.addEventListener('click', handleNewTask);
 
 
-const tasksLocalStorage = JSON.parse(localStorage.getItem("tasks"));
+const tasksLocalStorage = JSON.parse(localStorage.getItem("userTasks"));
 
-//ejercicio 2 pendiente
+//ejercicio 2 
 if (tasksLocalStorage !== null) {
   renderTasks(tasksLocalStorage);
+  tasks = tasksLocalStorage;
 
-  // pinta la lista de tareas almacenadas en tasksLocalStorage
 } else {
-  //sino existe el listado de tareas en el local storage
-  // pide los datos al servidor
+ 
   fetch('https://dev.adalab.es/api/todo')
   .then((response) => response.json())
   .then((data) => {
